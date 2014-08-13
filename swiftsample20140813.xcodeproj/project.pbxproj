@@ -395,6 +395,7 @@
 				1665E46A199B22F900659E27 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		1665E46B199B22F900659E27 /* Build configuration list for PBXNativeTarget "swiftsample20140813Tests" */ = {
 			isa = XCConfigurationList;
@@ -403,6 +404,7 @@
 				1665E46D199B22F900659E27 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
