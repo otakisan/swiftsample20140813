@@ -10,6 +10,8 @@ import UIKit
 
 class ViewController: UIViewController {
     
+    var memoId : String?
+    
     @IBOutlet weak var testLabel1: UILabel!
     
     // 任意テキスト
@@ -20,8 +22,8 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        userDataTextKeyTest.text = "testkey"
-        userDataTextValueTest.text = "testValue"
+        userDataTextKeyTest.text = self.memoId
+//        userDataTextValueTest.text = "testValue"
     }
 
     override func didReceiveMemoryWarning() {
@@ -39,7 +41,47 @@ class ViewController: UIViewController {
         return nowString
     }
     
-    private func SaveTest(){
+    // 画面⇄データオブジェクトを簡単に実現する仕組みがありそうだけど
+    private func getViewData() -> CoffeeMemoData {
+        var memoData = CoffeeMemoData()
+        
+        memoData.id = self.userDataTextKeyTest!.text
+        memoData.name = self.userDataTextValueTest!.text
+        
+        return memoData
+    }
+    
+    private func setViewData(memoData : CoffeeMemoData){
+        self.userDataTextKeyTest.text = memoData.id
+        self.userDataTextValueTest.text = memoData.name
+    }
+    
+    // ジェネリクスなんかで汎用的にできないかな どんなクラスでも同じ処理だよね
+    private func saveMemoData(memoData : CoffeeMemoData){
+        
+        // NSUserDefaultsクラスのインスタンスを取得
+        let defaults = NSUserDefaults.standardUserDefaults()
+        
+        var memoDataBinary = NSKeyedArchiver.archivedDataWithRootObject(memoData)
+        
+        // 保存するオブジェクトをキーと共に設定
+        defaults.setObject(memoDataBinary, forKey: self.memoId)
+        // ファイルに書き出す
+        let success = defaults.synchronize()
+
+        if success {
+            println("保存に成功")
+        }
+    }
+    
+    private func loadMemoData(id : String) -> CoffeeMemoData{
+        
+        let defaults = NSUserDefaults.standardUserDefaults()
+        var memoDataBinary = defaults.objectForKey(id) as NSData
+        
+        var memoData = NSKeyedUnarchiver.unarchiveObjectWithData(memoDataBinary) as CoffeeMemoData
+        
+        return memoData ?? CoffeeMemoData(id : id, name : "")
     }
     
     private func createDateFormatter() -> NSDateFormatter{
@@ -75,22 +117,37 @@ class ViewController: UIViewController {
     }
 
     @IBAction func loadButtonTapped(sender: AnyObject) {
-        var kv = NSUserDefaults.standardUserDefaults()
-        userDataTextValueTest.text = kv.stringForKey(userDataTextKeyTest.text)
+//        var kv = NSUserDefaults.standardUserDefaults()
+//        userDataTextValueTest.text = kv.stringForKey(userDataTextKeyTest.text)
+        
+        self.setViewData(self.loadMemoData(self.userDataTextKeyTest.text))
     }
     
     @IBAction func saveButtonTapped(sender: AnyObject) {
-        var kv = NSUserDefaults.standardUserDefaults()
-        var value = userDataTextValueTest.text
-        var key = userDataTextKeyTest.text
-        kv.setObject(value, forKey: key)
-        var ret = kv.synchronize()
+//        var kv = NSUserDefaults.standardUserDefaults()
+//        var value = userDataTextValueTest.text
+//        var key = userDataTextKeyTest.text
+//        kv.setObject(value, forKey: key)
+//        var ret = kv.synchronize()
+        
+        self.saveMemoData(self.getViewData())
     }
     
     @IBAction func testButton1Tapped(sender : AnyObject) {
         
         var nowString = getNowString()
         testLabel1.text = "clicked_\(nowString)"
+    }
+    
+    func clearData(){
+        /*
+        NSString *appDomain = [[NSBundle mainBundle] bundleIdentifier];
+        [[NSUserDefaults standardUserDefaults] removePersistentDomainForName:appDomain];
+*/
+    }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue!, sender: AnyObject!) {
+        println("editor prepareForSegue")
     }
 }
 
